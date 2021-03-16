@@ -2,37 +2,13 @@
 
 const express = require('express')
 const env = require('env-var')
-const { InfluxDB } = require('@influxdata/influxdb-client')
-const moment = require('moment')
-const Keycloak = require('keycloak-connect')
-const checkPermissions = require('./lib/check_permissions')
+const path = require('path')
+const openapi = require('express-openapi')
+const { readYaml } = require('./lib/utils/yaml')
+const middlewares = require('./lib/middlewares')
 
-const KeycloakJsonPath = env
-  .get('KEYCLOAK_JSON_PATH')
-  .default('./keycloak.json')
-  .asString()
-const Port = env
-  .get('PORT')
-  .default(80)
-  .asIntPositive()
-const Bucket = env
-  .get('BUCKET')
-  .required()
-  .asString()
-const InfluxDBToken = env
-  .get('INFLUXDB_TOKEN')
-  .required()
-  .asString()
-const InfluxDBUrl = env
-  .get('INFLUXDB_URL')
-  .required()
-  .asString()
-const InfluxDBOriganization = env
-  .get('INFLUXDB_ORG')
-  .required()
-  .asString()
+const Port = env.get('PORT').default(80).asIntPositive()
 
-const keycloak = new Keycloak({}, KeycloakJsonPath)
 
 /**
  * Binds and listens for connections for the express instance
@@ -40,7 +16,7 @@ const keycloak = new Keycloak({}, KeycloakJsonPath)
  * @param {number} port - The port to bind the service to
  */
 function listen (app, port) {
-  return new Promise(resolve => {
+  return new Promise((resolve) => {
     const listener = app.listen(port, () => {
       resolve(listener.address().port)
     })
@@ -52,26 +28,25 @@ function listen (app, port) {
  */
 function initExpress () {
   const app = express()
-  app.use(express.json())
-  app.use(keycloak.middleware())
+  app.use(middlewares)
   return app
 }
 
-/* Create the flux query
- * @param {string} thingId - the thing id 
- * @param {string} propertyName - the name of the property
-*/
-function createQuery(thingId, propertyName, { 
-  start, 
-  stop = 'now()'
-}) {
-  return `
-from(bucket: "${Bucket}")
-|> range(start: ${start}, stop: ${stop})
-|> filter(fn: (r) => r["_measurement"] == "property_raw")
-|> filter(fn: (r) => r["thingId"] == "${thingId}")
-|> filter(fn: (r) => r["propertyId"] == "${propertyName}")  
-  `
+/**
+ * Creates the openapi documentation from the api-doc.yml
+ */
+function generateApiDoc () {
+  const apiDoc = readYaml(path.join(__dirname, 'api-doc.yml'))
+  if (process.env.production === undefined) {
+    apiDoc.servers.push({
+      url: 'http://localhost:9221/',
+      description: 'Local development server'
+    })
+  }
+  return {
+    ...apiDoc,
+    'x-express-openapi-validation-strict': true
+  }
 }
 
 /**
@@ -79,42 +54,31 @@ from(bucket: "${Bucket}")
  */
 async function initServer () {
   const app = initExpress()
-  const queryApi = new InfluxDB({url: InfluxDBUrl, token: InfluxDBToken}).getQueryApi(InfluxDBOriganization)
+  const apiDoc = generateApiDoc()
 
-  app.post('/property/:thingId/:propertyName', keycloak.protect(), async (req, res) => {
-    const permissions = await checkPermissions({
-      resource: `${req.params.thingId}/properties/${req.params.propertyName}`,
-      token: req.kauth.grant.access_token.token,
-      scopes: [ 'GET' ]
-    })
-
-    if(permissions === undefined) {
-      return res.status(403).json('Insufficient')
-    }
-
-    // fix connctd ids
-    req.params.thingId = req.params.thingId.replace('uri:urn:', '')
-
-    if(req.body.start !== undefined) {
-      if(moment(req.body.start, moment.ISO_8601).isValid() !== true) {
-        return res.status(400).send('Invalid start date')
+  openapi.initialize({
+    apiDoc,
+    app,
+    paths: path.resolve(__dirname, './lib/routes/'),
+    exposeApiDocs: true,
+    docsPath: '/.openapi',
+    consumesMiddleware: {
+      'application/json': express.json()
+    },
+    securityHandlers: {
+      auth: (req, scopes) => {
+        if (req.kauth && req.kauth.grant) {
+          const tokenScopes = req.kauth.grant.access_token.content.scope.split(
+            ' '
+          )
+          if (scopes.every((r) => tokenScopes.includes(r))) {
+            return true
+          } else {
+            // throw new InvalidOrMissingScope()
+          }
+        }
+        // throw new InvalidOrMissingToken()
       }
-    } else {
-      return res.status(400).send('Missing start date')
-    }
-
-    if(req.body.stop !== undefined) {
-      if(moment(req.body.stop, moment.ISO_8601).isValid() !== true) {
-        return res.status(400).send('Invalid stop date')
-      }
-    } 
-
-    try {
-      const result = await queryApi.queryRaw(createQuery(req.params.thingId, req.params.propertyName, req.body))
-      res.setHeader('content-type', 'text/csv');
-      res.send(result)
-    } catch(e) {
-      res.status(500).send('Internal server error')
     }
   })
 
@@ -122,11 +86,11 @@ async function initServer () {
 }
 
 const promise = initServer()
-  .then(port => {
+  .then((port) => {
     console.log(`Started on port ${port}`)
     return port
   })
-  .catch(e => {
+  .catch((e) => {
     console.error(e)
     process.exit()
   })
