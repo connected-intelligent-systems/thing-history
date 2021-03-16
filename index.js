@@ -9,7 +9,6 @@ const middlewares = require('./lib/middlewares')
 
 const Port = env.get('PORT').default(80).asIntPositive()
 
-
 /**
  * Binds and listens for connections for the express instance
  * @param {object} app - The express instance
