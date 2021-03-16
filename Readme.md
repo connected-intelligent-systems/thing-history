@@ -1,0 +1,3 @@
+RESOURCE_SERVER_AUDIENCE: resources
+KEYCLOAK_HOST: http://keycloak:8080
+KEYCLOAK_REALM: foresight
