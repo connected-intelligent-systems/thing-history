@@ -1,0 +1,14 @@
+stages:
+    - build
+    
+build-docker-image:
+    stage: build
+    tags:
+        - shell
+    only:
+        - tags
+        - master
+    script:
+        - docker build -t $CI_REGISTRY_IMAGE:${CI_COMMIT_TAG:-latest} .
+        - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN registry.gitlab.com
+        - docker push $CI_REGISTRY_IMAGE:${CI_COMMIT_TAG:-latest}

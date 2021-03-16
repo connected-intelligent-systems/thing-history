@@ -6,7 +6,9 @@
   "scripts": {
     "start": "npm run start:production",
     "lint": "prettier --write '**/*.js' && standard --fix '**/*.js'",
-    "depcheck": "depcheck"
+    "depcheck": "depcheck",
+    "start:production": "cross-env NODE_ENV=production node .",
+    "start:development": "cross-env NODE_ENV=development node --inspect=0.0.0.0:9229 ."
   },
   "author": "Sebastian Alberternst <sebastian.alberternst@dfki.de>",
   "license": "UNLICENSED",
