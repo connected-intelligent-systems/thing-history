@@ -4,6 +4,7 @@ const express = require('express')
 const env = require('env-var')
 const path = require('path')
 const openapi = require('express-openapi')
+const { HttpError, InvalidOrMissingScope } = require('./lib/utils/http_errors')
 const { readYaml } = require('./lib/utils/yaml')
 const middlewares = require('./lib/middlewares')
 
@@ -49,6 +50,37 @@ function generateApiDoc () {
 }
 
 /**
+ * Installs a global error handler.
+ * @param {object} app - The express instance
+ */
+function installErrorHandler (app) {
+  app.use((error, req, res, next) => {
+    console.log(error)
+    // catch our own error instances
+    if (error instanceof HttpError) {
+      return res.status(error.status).json({
+        status: error.status,
+        error: error.error,
+        message: error.message,
+        details: error.details
+      })
+    }
+    // catch unknown errors
+    const { message, status, errors } = error
+    if (status === undefined || status === 0) {
+      return res.status(500).send('Internal server error')
+    } else {
+      // convert them if they have a status
+      res.status(status).json({
+        status: status,
+        message,
+        details: errors
+      })
+    }
+  })
+}
+
+/**
  * Entry point fuunction that initializes and runs the server
  */
 async function initServer () {
@@ -73,13 +105,18 @@ async function initServer () {
           if (scopes.every((r) => tokenScopes.includes(r))) {
             return true
           } else {
-            // throw new InvalidOrMissingScope()
+            throw new InvalidOrMissingScope()
           }
+        } else {
+          throw new InvalidOrMissingScope()
         }
-        // throw new InvalidOrMissingToken()
       }
     }
   })
+
+  // install the default error handler that handles the custom
+  // httperror exception
+  installErrorHandler(app)
 
   return listen(app, Port)
 }
