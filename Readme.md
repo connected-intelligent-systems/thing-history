@@ -1,3 +1,4 @@
-RESOURCE_SERVER_AUDIENCE: resources
-KEYCLOAK_HOST: http://keycloak:8080
-KEYCLOAK_REALM: foresight
+
+
+GET /property/{thingId}/{propertyName}/query?from=from&to=to&every=2m&fn=mean&fill=true
+GET /property/{thingId}/{propertyName}/count?window

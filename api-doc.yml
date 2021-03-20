@@ -72,6 +72,72 @@ paths:
           description: Property not found
       security:
         - auth: []
+  /property/{thingId}/{propertyName}/count:
+    get:
+      description: Returns time series data for a thing property
+      parameters:
+      - name: thingId
+        in: path
+        description: ID of the thing
+        required: true
+        schema:
+          type: string
+      - name: propertyName
+        in: path
+        description: Name of the property
+        required: true
+        schema:
+          type: string
+      - name: start
+        in: Query
+        schema: 
+          type: string
+          format: date-time
+      - name: stop
+        in: Query
+        schema: 
+          type: string
+          format: date-time
+      responses:
+        '200':
+          description: Operation Successful
+        '403':
+          description: Insufficient Rights
+        '404':
+          description: Property not found
+      security:
+        - auth: []
+    post: 
+      description: Returns time series data for a thing property
+      parameters:
+      - name: thingId
+        in: path
+        description: ID of the thing
+        required: true
+        schema:
+          type: string
+      - name: propertyName
+        in: path
+        description: Name of the property
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Thing description added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Query'
+      responses:
+        '200':
+          description: Operation Successful
+        '403':
+          description: Insufficient Rights
+        '404':
+          description: Property not found
+      security:
+        - auth: []
 components:
   schemas:
     Query:
