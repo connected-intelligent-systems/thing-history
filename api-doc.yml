@@ -108,7 +108,7 @@ paths:
       security:
         - auth: []
     post: 
-      description: Returns time series data for a thing property
+      description: Counts time series data for a thing property
       parameters:
       - name: thingId
         in: path
@@ -123,12 +123,11 @@ paths:
         schema:
           type: string
       requestBody:
-        description: Thing description added
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Query'
+              $ref: '#/components/schemas/CountQuery'
       responses:
         '200':
           description: Operation Successful
@@ -149,6 +148,26 @@ components:
         stop:
           type: string
           format: date-time
+    CountQuery:
+      type: object
+      properties: 
+        start:
+          type: string
+          format: date-time
+        stop:
+          type: string
+          format: date-time
+        filterFuncs:
+          type: array
+          items:
+            $ref: '#/components/schemas/FilterFunc'
+        values:
+          type: array
+          items:
+            type: string
+    FilterFunc:
+      type: string
+      enum: [eq, ne, gt, lt, ge, le]
   securitySchemes:
     auth:
       type: oauth2
