@@ -6,7 +6,7 @@ servers:
 - url: https://thing-history.apps.foresight.aareon.com/api/
   description: Foresight Thing Registry 
 paths:
-  /property/{thingId}/{propertyName}:
+  /property/{thingId}/{propertyName}/query:
     post: 
       description: Returns time series data for a thing property
       parameters:
