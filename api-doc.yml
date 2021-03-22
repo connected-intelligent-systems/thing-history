@@ -133,6 +133,7 @@ components:
           - type: number
         func:
           $ref: '#/components/schemas/FilterFunc'
+      required: [ value, func ]
     FilterFunc:
       type: string
       enum: [eq, ne, gt, lt, ge, le]
