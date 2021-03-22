@@ -7,40 +7,6 @@ servers:
   description: Foresight Thing Registry 
 paths:
   /property/{thingId}/{propertyName}:
-    get:
-      description: Returns time series data for a thing property
-      parameters:
-      - name: thingId
-        in: path
-        description: ID of the thing
-        required: true
-        schema:
-          type: string
-      - name: propertyName
-        in: path
-        description: Name of the property
-        required: true
-        schema:
-          type: string
-      - name: start
-        in: Query
-        schema: 
-          type: string
-          format: date-time
-      - name: stop
-        in: Query
-        schema: 
-          type: string
-          format: date-time
-      responses:
-        '200':
-          description: Operation Successful
-        '403':
-          description: Insufficient Rights
-        '404':
-          description: Property not found
-      security:
-        - auth: []
     post: 
       description: Returns time series data for a thing property
       parameters:
@@ -73,42 +39,8 @@ paths:
       security:
         - auth: []
   /property/{thingId}/{propertyName}/count:
-    get:
-      description: Returns time series data for a thing property
-      parameters:
-      - name: thingId
-        in: path
-        description: ID of the thing
-        required: true
-        schema:
-          type: string
-      - name: propertyName
-        in: path
-        description: Name of the property
-        required: true
-        schema:
-          type: string
-      - name: start
-        in: Query
-        schema: 
-          type: string
-          format: date-time
-      - name: stop
-        in: Query
-        schema: 
-          type: string
-          format: date-time
-      responses:
-        '200':
-          description: Operation Successful
-        '403':
-          description: Insufficient Rights
-        '404':
-          description: Property not found
-      security:
-        - auth: []
     post: 
-      description: Counts time series data for a thing property
+      description: Counts records from time series data of a thing property
       parameters:
       - name: thingId
         in: path
@@ -142,29 +74,65 @@ components:
     Query:
       type: object
       properties: 
-        start:
-          type: string
-          format: date-time
-        stop:
-          type: string
-          format: date-time
+        range:
+          $ref: '#/components/schemas/Range'
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Filter'
+        aggregateWindow:
+          $ref: '#/components/schemas/AggregateWindow'
+      required: [ range ]
     CountQuery:
       type: object
       properties: 
-        start:
+        range:
+          $ref: '#/components/schemas/Range'
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Filter'
+        window:
+          $ref: '#/components/schemas/Window'
+    Range:
+      type: object
+      properties: 
+        start: 
           type: string
           format: date-time
         stop:
           type: string
           format: date-time
-        filterFuncs:
-          type: array
-          items:
-            $ref: '#/components/schemas/FilterFunc'
-        values:
-          type: array
-          items:
-            type: string
+      required: [ start ]
+    AggregateWindow:
+      type: object
+      properties:
+        every: 
+          type: string
+        createEmpty:
+          type: boolean
+        func:
+          type: string
+          enum: [mean, median, stddev]
+      required: [ every, func ]
+    Window:
+      type: object
+      properties:
+        createEmpty:
+          type: boolean
+        every:
+          type: string    
+      required: [ every ]
+    Filter:
+      type: object
+      properties:
+        value:
+          oneOf:
+          - type: string
+          - type: boolean
+          - type: number
+        func:
+          $ref: '#/components/schemas/FilterFunc'
     FilterFunc:
       type: string
       enum: [eq, ne, gt, lt, ge, le]
