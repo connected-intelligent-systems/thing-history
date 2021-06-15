@@ -15,6 +15,8 @@ services:
       - INFLUXDB_URL=${INFLUXDB_URL}
       - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
       - INFLUXDB_ORG=${INFLUXDB_ORG}
+      - RESOURCE_CLIENT_ID=${RESOURCE_CLIENT_ID}
+      - RESOURCE_CLIENT_SECRET=${RESOURCE_CLIENT_SECRET}
     volumes:
       - ./keycloak.json:/app/keycloak.json
       - ./lib:/app/lib
