@@ -6,6 +6,23 @@ servers:
 - url: https://thing-history.apps.foresight.aareon.com/api/
   description: Foresight Thing Registry 
 paths:
+  /properties/query:
+    post: 
+      description: Returns time series data for thing properties
+      requestBody:
+        description: Thing description added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertiesQuery'
+      responses:
+        '200':
+          description: Operation Successful
+        '403':
+          description: Insufficient Rights
+      security:
+        - auth: []
   /property/{thingId}/{propertyName}/query:
     post: 
       description: Returns time series data for a thing property
@@ -83,6 +100,17 @@ components:
         aggregateWindow:
           $ref: '#/components/schemas/AggregateWindow'
       required: [ range ]
+    PropertiesQuery:
+      type: object
+      properties: 
+        range:
+          $ref: '#/components/schemas/Range'
+        properties:
+          type: array
+          items: 
+            type: string
+          minItems: 1
+      required: [ range, properties ]
     CountQuery:
       type: object
       properties: 
