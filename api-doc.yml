@@ -105,6 +105,12 @@ components:
       properties: 
         range:
           $ref: '#/components/schemas/Range'
+        filters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Filter'
+        aggregateWindow:
+          $ref: '#/components/schemas/AggregateWindow'
         properties:
           type: array
           items: 
