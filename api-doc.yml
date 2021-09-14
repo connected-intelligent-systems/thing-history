@@ -86,6 +86,37 @@ paths:
           description: Property not found
       security:
         - auth: []
+  /property/{thingId}/{propertyName}/last:
+    get: 
+      description: Get the last record from a time series of thing property
+      parameters:
+      - name: thingId
+        in: path
+        description: ID of the thing
+        required: true
+        schema:
+          type: string
+      - name: propertyName
+        in: path
+        description: Name of the property
+        required: true
+        schema:
+          type: string
+      - name: start
+        in: query
+        description: Start duration of the query to go back
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Operation Successful
+        '403':
+          description: Insufficient Rights
+        '404':
+          description: Property not found
+      security:
+        - auth: []
 components:
   schemas:
     Query:
