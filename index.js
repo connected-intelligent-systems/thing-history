@@ -99,15 +99,14 @@ async function initServer () {
     securityHandlers: {
       auth: (req, scopes) => {
         if (req.auth) {
-          // const tokenScopes = req.kauth.grant.access_token.content.scope.split(
-          //   ' '
-          // )
-          // if (scopes.every((r) => tokenScopes.includes(r))) {
-          //   return true
-          // } else {
-          //   throw new InvalidOrMissingScope()
-          // }
-          return true
+          const tokenScopes = req.auth.access_token.content.scope.split(
+            ' '
+          )
+          if (scopes.every((r) => tokenScopes.includes(r))) {
+            return true
+          } else {
+            throw new InvalidOrMissingScope()
+          }
         } else {
           throw new InvalidOrMissingScope()
         }
