@@ -1,5 +1,6 @@
 'use strict'
 
+require('dotenv').config()
 const express = require('express')
 const env = require('env-var')
 const path = require('path')
@@ -8,7 +9,7 @@ const { HttpError, InvalidOrMissingScope } = require('./lib/utils/http_errors')
 const { readYaml } = require('./lib/utils/yaml')
 const middlewares = require('./lib/middlewares')
 
-const Port = env.get('PORT').default(80).asIntPositive()
+const Port = env.get('PORT').default(8080).asIntPositive()
 
 /**
  * Binds and listens for connections for the express instance
@@ -97,15 +98,16 @@ async function initServer () {
     },
     securityHandlers: {
       auth: (req, scopes) => {
-        if (req.kauth && req.kauth.grant) {
-          const tokenScopes = req.kauth.grant.access_token.content.scope.split(
-            ' '
-          )
-          if (scopes.every((r) => tokenScopes.includes(r))) {
-            return true
-          } else {
-            throw new InvalidOrMissingScope()
-          }
+        if (req.auth) {
+          // const tokenScopes = req.kauth.grant.access_token.content.scope.split(
+          //   ' '
+          // )
+          // if (scopes.every((r) => tokenScopes.includes(r))) {
+          //   return true
+          // } else {
+          //   throw new InvalidOrMissingScope()
+          // }
+          return true
         } else {
           throw new InvalidOrMissingScope()
         }

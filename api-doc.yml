@@ -1,164 +1,54 @@
 openapi: "3.0.0"
 info:
   title: History Service
-  version: 0.0.1
+  version: 0.1.0
 servers:
 - url: https://thing-history.apps.foresight.aareon.com/api/
-  description: Foresight Thing Registry 
+  description: History Service
 paths:
-  /properties/query:
-    post: 
-      description: Returns time series data for thing properties
-      requestBody:
-        description: Thing description added
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PropertiesQuery'
-      responses:
-        '200':
-          description: Operation Successful
-        '403':
-          description: Insufficient Rights
-      security:
-        - auth: []
-  /property/{thingId}/{propertyName}/query:
-    post: 
-      description: Returns time series data for a thing property
-      parameters:
-      - name: thingId
-        in: path
-        description: ID of the thing
-        required: true
-        schema:
-          type: string
-      - name: propertyName
-        in: path
-        description: Name of the property
-        required: true
-        schema:
-          type: string
-      requestBody:
-        description: Thing description added
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Query'
-      responses:
-        '200':
-          description: Operation Successful
-        '403':
-          description: Insufficient Rights
-        '404':
-          description: Property not found
-      security:
-        - auth: []
-  /property/{thingId}/{propertyName}/count:
-    post: 
-      description: Counts records from time series data of a thing property
-      parameters:
-      - name: thingId
-        in: path
-        description: ID of the thing
-        required: true
-        schema:
-          type: string
-      - name: propertyName
-        in: path
-        description: Name of the property
-        required: true
-        schema:
-          type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CountQuery'
-      responses:
-        '200':
-          description: Operation Successful
-        '403':
-          description: Insufficient Rights
-        '404':
-          description: Property not found
-      security:
-        - auth: []
-  /property/{thingId}/{propertyName}/last:
+  /query:
     get: 
-      description: Get the last record from a time series of thing property
+      description: Returns time series data for thing properties
       parameters:
-      - name: thingId
-        in: path
-        description: ID of the thing
-        required: true
-        schema:
-          type: string
-      - name: propertyName
-        in: path
-        description: Name of the property
-        required: true
-        schema:
-          type: string
-      - name: start
-        in: query
-        description: Start duration of the query to go back
-        required: false
-        schema:
-          type: string
+        - name: property
+          in: query
+          required: true
+          schema:
+            type: array
+            uniqueItems: true
+            items:
+              type: string
+        - name: start
+          in: query
+          example: read
+          required: true
+          schema:
+            type: string
+        - name: stop
+          in: query
+          example: read
+          schema:
+            type: string
       responses:
         '200':
           description: Operation Successful
         '403':
           description: Insufficient Rights
-        '404':
-          description: Property not found
       security:
         - auth: []
 components:
   schemas:
-    Query:
-      type: object
-      properties: 
-        range:
-          $ref: '#/components/schemas/Range'
-        filters:
-          type: array
-          items:
-            $ref: '#/components/schemas/Filter'
-        aggregateWindow:
-          $ref: '#/components/schemas/AggregateWindow'
-      required: [ range ]
     PropertiesQuery:
       type: object
       properties: 
         range:
           $ref: '#/components/schemas/Range'
-        filters:
-          type: array
-          items:
-            $ref: '#/components/schemas/Filter'
-        aggregateWindow:
-          $ref: '#/components/schemas/AggregateWindow'
         properties:
           type: array
           items: 
             type: string
           minItems: 1
       required: [ range, properties ]
-    CountQuery:
-      type: object
-      properties: 
-        range:
-          $ref: '#/components/schemas/Range'
-        filters:
-          type: array
-          items:
-            $ref: '#/components/schemas/Filter'
-        window:
-          $ref: '#/components/schemas/Window'
     Range:
       type: object
       properties: 
@@ -169,39 +59,6 @@ components:
           type: string
           format: date-time
       required: [ start ]
-    AggregateWindow:
-      type: object
-      properties:
-        every: 
-          type: string
-        createEmpty:
-          type: boolean
-        func:
-          type: string
-          enum: [mean, median, stddev]
-      required: [ every, func ]
-    Window:
-      type: object
-      properties:
-        createEmpty:
-          type: boolean
-        every:
-          type: string    
-      required: [ every ]
-    Filter:
-      type: object
-      properties:
-        value:
-          oneOf:
-          - type: string
-          - type: boolean
-          - type: number
-        func:
-          $ref: '#/components/schemas/FilterFunc'
-      required: [ value, func ]
-    FilterFunc:
-      type: string
-      enum: [eq, ne, gt, lt, ge, le]
   securitySchemes:
     auth:
       type: oauth2

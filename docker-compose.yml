@@ -4,19 +4,12 @@ services:
   history:
     build: .
     ports:
-      - 9221:80
+      - 9221:8080
       - 9229:9229
     environment:
       - NODE_ENV=development
-      - RESOURCE_SERVER_AUDIENCE=resources
-      - KEYCLOAK_HOST=https://aareoniam.apps.foresight.aareon.com
-      - KEYCLOAK_REALM=foresight
-      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET}
-      - INFLUXDB_URL=${INFLUXDB_URL}
-      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
-      - INFLUXDB_ORG=${INFLUXDB_ORG}
-      - RESOURCE_CLIENT_ID=${RESOURCE_CLIENT_ID}
-      - RESOURCE_CLIENT_SECRET=${RESOURCE_CLIENT_SECRET}
+      - KEYCLOAK_HOST=${KEYCLOAK_HOST}
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
     volumes:
       - ./keycloak.json:/app/keycloak.json
       - ./lib:/app/lib
