@@ -1,4 +1,4 @@
-FROM node:14.8.0
+FROM node:20
 
 RUN mkdir /app
 COPY package.json /app
@@ -11,6 +11,6 @@ RUN npm install cross-env
 COPY index.js /app
 COPY lib /app/lib
 
-EXPOSE 8080
+EXPOSE 3000
 
 CMD ["/app/run.sh"]

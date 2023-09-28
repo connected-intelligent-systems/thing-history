@@ -1,13 +1,10 @@
+# Thing History
 
+## Authors
 
-GET /property/{thingId}/{propertyName}/query?from=from&to=to&every=2m&fn=mean&fill=true
-GET /property/{thingId}/{propertyName}/count?window
+Sebastian Alberternst <sebastian.alberternst@dfki.de>
 
-{
-    "start": "",
-    "stop": "",
-    "every": "5m",
-    "filters": [
-        { "value": 1.0, "func": eq }
-    ]
-}
+## License
+
+MIT 
+
