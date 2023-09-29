@@ -98,13 +98,14 @@ async function initServer () {
     } else {
       res.setHeader('content-type', 'application/json')
       let hasWritten = false
+      res.write('[')
       for await (const row of query) {
         const result = {
           ts: parseInt(row.ts),
           [req.params.name]: getValueFromRow(row)
         }
         if (hasWritten === false) {
-          res.write(`[${JSON.stringify(result)}`)
+          res.write(`${JSON.stringify(result)}`)
           hasWritten = true
         } else {
           res.write(`,${JSON.stringify(result)}`)
