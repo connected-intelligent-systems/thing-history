@@ -7,7 +7,6 @@ const { HttpError } = require('./lib/utils/http_errors')
 const middlewares = require('./lib/middlewares')
 const {
   init,
-  checkToken,
   getTimeseries,
   getLatest,
   getValueFromRow
@@ -73,6 +72,10 @@ function installErrorHandler (app) {
 async function initServer () {
   const app = initExpress()
   await init()
+
+  app.get('/', (req, res) => {
+    res.send('OK')
+  })
 
   app.get('/:accessToken/:name', async (req, res) => {
     const { from = Date.now() - 8006400000, to = Date.now() } = req.query
