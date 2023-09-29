@@ -78,7 +78,7 @@ async function initServer () {
   })
 
   app.get('/:accessToken/:name', async (req, res) => {
-    const { from = Date.now() - 8006400000, to = Date.now() } = req.query
+    const { from = Date.now() - 86400000, to = Date.now() } = req.query
     const query = await getTimeseries(
       req.params.accessToken,
       req.params.name,
@@ -88,7 +88,7 @@ async function initServer () {
 
     if (req.accepts('text/csv')) {
       res.setHeader('content-type', 'text/csv')
-      res.write('timestamp,power\n')
+      res.write(`timestamp,${req.params.name}\n`)
       for await (const row of query) {
         const ts = parseInt(row.ts)
         const value = getValueFromRow(row)
@@ -99,7 +99,10 @@ async function initServer () {
       res.setHeader('content-type', 'application/json')
       let hasWritten = false
       for await (const row of query) {
-        const result = { ts: parseInt(row.ts), value: getValueFromRow(row) }
+        const result = {
+          ts: parseInt(row.ts),
+          value: getValueFromRow(row)
+        }
         if (hasWritten === false) {
           res.write(`[${JSON.stringify(result)}`)
           hasWritten = true
