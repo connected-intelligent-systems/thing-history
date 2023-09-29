@@ -101,7 +101,7 @@ async function initServer () {
       for await (const row of query) {
         const result = {
           ts: parseInt(row.ts),
-          value: getValueFromRow(row)
+          [req.params.name]: getValueFromRow(row)
         }
         if (hasWritten === false) {
           res.write(`[${JSON.stringify(result)}`)
