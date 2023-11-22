@@ -9,6 +9,7 @@ RUN npm install --production
 RUN npm install cross-env
 
 COPY index.js /app
+COPY api-doc.yml /app
 COPY lib /app/lib
 
 EXPOSE 3000
