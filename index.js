@@ -9,9 +9,6 @@ const path = require('path')
 const { HttpError } = require('./lib/utils/http_errors')
 const middlewares = require('./lib/middlewares')
 const { readYaml } = require('./lib/utils/yaml')
-const {
-  init
-} = require('./lib/models/timeseries')
 
 const Port = env.get('PORT').default(3000).asIntPositive()
 
@@ -109,13 +106,11 @@ function installErrorHandler (app) {
  */
 async function initServer () {
   const app = initExpress()
-  await init()
-
   const apiDoc = generateApiDoc()
 
   installSwaggerUi(app)
 
-  const framework = await openapi.initialize({
+  await openapi.initialize({
     apiDoc,
     app,
     paths: path.resolve(__dirname, './lib/routes/'),
@@ -125,10 +120,10 @@ async function initServer () {
     }
   })
 
+  // health endpoint
   app.get('/', (req, res) => {
     res.send('OK')
   })
-
 
   // install the default error handler that handles the custom
   // httperror exception
