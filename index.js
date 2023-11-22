@@ -2,17 +2,24 @@
 
 require('dotenv').config()
 const express = require('express')
+const openapi = require('express-openapi')
+const swagger = require('swagger-ui-express')
 const env = require('env-var')
+const path = require('path')
 const { HttpError } = require('./lib/utils/http_errors')
 const middlewares = require('./lib/middlewares')
+const { readYaml } = require('./lib/utils/yaml')
 const {
-  init,
-  getTimeseries,
-  getLatest,
-  getValueFromRow
+  init
 } = require('./lib/models/timeseries')
 
 const Port = env.get('PORT').default(3000).asIntPositive()
+
+const BasePath = env
+  .get('BASE_PATH')
+  .default('/api/history')
+  .required()
+  .asString()
 
 /**
  * Binds and listens for connections for the express instance
@@ -34,6 +41,37 @@ function initExpress () {
   const app = express()
   app.use(middlewares)
   return app
+}
+
+/**
+ * Creates the openapi documentation from the api-doc.yml
+ */
+function generateApiDoc () {
+  const apiDoc = readYaml(path.join(__dirname, 'api-doc.yml'))
+  apiDoc.servers = [
+    {
+      url: BasePath
+    }
+  ]
+  return {
+    ...apiDoc,
+    'x-express-openapi-validation-strict': true
+  }
+}
+
+/**
+ * Install Swagger-Ui routes
+ */
+function installSwaggerUi (app) {
+  app.use(
+    `${BasePath}/swagger-ui`,
+    swagger.serve,
+    swagger.setup(null, {
+      swaggerOptions: {
+        url: `${BasePath}/.openapi`
+      }
+    })
+  )
 }
 
 /**
@@ -67,59 +105,30 @@ function installErrorHandler (app) {
 }
 
 /**
- * Entry point fuunction that initializes and runs the server
+ * Entry point function that initializes and runs the server
  */
 async function initServer () {
   const app = initExpress()
   await init()
 
+  const apiDoc = generateApiDoc()
+
+  installSwaggerUi(app)
+
+  const framework = await openapi.initialize({
+    apiDoc,
+    app,
+    paths: path.resolve(__dirname, './lib/routes/'),
+    docsPath: '/.openapi',
+    consumesMiddleware: {
+      'application/json': express.json()
+    }
+  })
+
   app.get('/', (req, res) => {
     res.send('OK')
   })
 
-  app.get('/:accessToken/:name', async (req, res) => {
-    const { from = Date.now() - 86400000, to = Date.now() } = req.query
-    const query = await getTimeseries(
-      req.params.accessToken,
-      req.params.name,
-      from,
-      to
-    )
-
-    if (req.accepts('text/csv')) {
-      res.setHeader('content-type', 'text/csv')
-      res.write(`timestamp,${req.params.name}\n`)
-      for await (const row of query) {
-        const ts = parseInt(row.ts)
-        const value = getValueFromRow(row)
-        res.write(`${ts},${value}\n`)
-      }
-      res.end()
-    } else {
-      res.setHeader('content-type', 'application/json')
-      let hasWritten = false
-      res.write('[')
-      for await (const row of query) {
-        const result = {
-          ts: parseInt(row.ts),
-          [req.params.name]: getValueFromRow(row)
-        }
-        if (hasWritten === false) {
-          res.write(`${JSON.stringify(result)}`)
-          hasWritten = true
-        } else {
-          res.write(`,${JSON.stringify(result)}`)
-        }
-      }
-      res.write(']')
-      res.end()
-    }
-  })
-
-  app.get('/:accessToken/:name/latest', async (req, res) => {
-    const result = await getLatest(req.params.accessToken, req.params.name)
-    res.json(result)
-  })
 
   // install the default error handler that handles the custom
   // httperror exception

@@ -1,0 +1,98 @@
+openapi: "3.0.0"
+info:
+  title: Thing History
+  version: 0.2.5
+paths:
+  /{accessToken}/{name}:
+    get:
+      description: Returns the history of a specific thing property
+      parameters:
+      - name: accessToken
+        in: path
+        description: A valid thingsboard access token
+        example: msbTmtb9FfWQzzyFJBsj
+        required: true
+        schema:
+          type: string
+      - name: name
+        in: path
+        description: A valid property of the thing
+        example: power
+        required: true
+        schema:
+          type: string
+      - name: from
+        in: query
+        description: Begin unix timestamp in milliseconds of the query
+        example: 1700645544000
+        required: false
+        schema:
+          type: integer
+      - name: to
+        in: query
+        description: End unix timestamp in milliseconds of the query
+        example: 1700649144000
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ts:
+                      type: integer
+              example:
+                [
+                  {"ts":1700561157031,"power":0},
+                  {"ts":1700561155013,"power":0},
+                  {"ts":1700561159030,"power":0},
+                  {"ts":1700561155032,"power":0}
+                ]
+            text/csv:
+              schema:
+                type: string
+              example: |
+                timestamp,power
+                1700561157031,100
+                1700561155013,110
+                1700561159030,120
+                1700561155032,130
+  /{accessToken}/{name}/latest:
+    get:
+      description: Returns the latest value of a specific thing property
+      parameters:
+      - name: accessToken
+        in: path
+        description: A valid thingsboard access token
+        example: msbTmtb9FfWQzzyFJBsj
+        required: true
+        schema:
+          type: string
+      - name: name
+        in: path
+        description: A valid property of the thing
+        example: power
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ts:
+                    type: integer
+              example:
+                {
+                  "ts": 1700561157031,
+                  "power":0
+                }
