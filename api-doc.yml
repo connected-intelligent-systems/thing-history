@@ -2,7 +2,35 @@ openapi: "3.0.0"
 info:
   title: Thing History
   version: 0.3.1
+  description: A service to retreive history data of things
 paths:
+  /{accessToken}/latest:
+    get:
+      description: Returns the latest values of all thing properties
+      parameters:
+      - name: accessToken
+        in: path
+        description: A valid thingsboard access token
+        example: msbTmtb9FfWQzzyFJBsj
+        required: true
+        schema:
+          type: string
+      - name: includeTimestamps
+        in: query
+        description: Include timestamp in the response
+        example: false
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ValuesWithTimestamp'
+                  - $ref: '#/components/schemas/Values'
   /{accessToken}/{name}:
     get:
       description: Returns the history of a specific thing property
@@ -41,18 +69,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    ts:
-                      type: integer
+                $ref: '#/components/schemas/History'
               example:
                 [
                   {"ts":1700561157031,"power":0},
-                  {"ts":1700561155013,"power":0},
-                  {"ts":1700561159030,"power":0},
-                  {"ts":1700561155032,"power":0}
+                  {"ts":1700561155013,"power":1},
+                  {"ts":1700561159030,"power":2},
+                  {"ts":1700561155032,"power":3}
                 ]
             text/csv:
               schema:
@@ -81,18 +104,91 @@ paths:
         required: true
         schema:
           type: string
+      - name: includeTimestamps
+        in: query
+        description: Include timestamp in the response
+        example: false
+        required: false
+        schema:
+          type: boolean
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  ts:
-                    type: integer
-              example:
-                {
-                  "ts": 1700561157031,
-                  "power":0
-                }
+                oneOf:
+                  - $ref: '#/components/schemas/ValueWithTimestamp'
+                  - $ref: '#/components/schemas/Value'
+components:
+  schemas:
+    ValueWithTimestamp:
+      type: object
+      minProperties: 2
+      maxProperties: 2
+      properties:
+        ts:
+          type: integer
+          example: 1700561157031
+      additionalProperties:
+        anyOf:
+        - type: string
+          example: "string value"
+        - type: number
+          example: 42.3
+        - type: integer
+          example: 42
+        - type: boolean
+          example: true
+        - type: array
+          items: {}
+          example:
+            [ 1,2,3 ]
+        - type: object
+          example:
+            { "key": "value" }
+      required: 
+        - ts
+      example: 
+        { 
+          "ts": 1700561157031,
+          "key": "value"
+        }
+    Value:
+      anyOf:
+        - type: string
+          example: "string value"
+        - type: number
+          example: 42.3
+        - type: integer
+          example: 42
+        - type: boolean
+          example: true
+        - type: array
+          items: {}
+          example:
+            [ 1,2,3 ]
+        - type: object
+          example:
+            { "key": "value" }
+    History:
+      type: array
+      items:
+        $ref: '#/components/schemas/ValueWithTimestamp'
+    Values:
+      type: object
+      example:
+        {
+          "power": 1,
+          "energy": 2 
+        }
+    ValuesWithTimestamp:
+      type: array
+      items:
+        $ref:  '#/components/schemas/ValueWithTimestamp'
+      example:
+        [
+          { "ts": 1700561157031, "power": 1 },
+          { "ts": 1700561158031, "power": 12 },
+        ]
+    
