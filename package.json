@@ -1,6 +1,6 @@
 {
   "name": "thing-history",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -22,6 +22,7 @@
     "js-yaml": "^4.1.0",
     "pg": "^8.11.3",
     "pg-query-stream": "^4.5.3",
+    "postgres": "^3.4.3",
     "swagger-ui-express": "^5.0.0"
   },
   "devDependencies": {
