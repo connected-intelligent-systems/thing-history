@@ -1,6 +1,6 @@
 {
   "name": "thing-history",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -13,15 +13,12 @@
   "author": "Sebastian Alberternst <sebastian.alberternst@dfki.de>",
   "license": "MIT",
   "dependencies": {
-    "cassandra-driver": "^4.6.4",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "env-var": "^7.4.1",
     "express": "^4.17.1",
     "express-openapi": "^12.1.3",
     "js-yaml": "^4.1.0",
-    "pg": "^8.11.3",
-    "pg-query-stream": "^4.5.3",
     "postgres": "^3.4.3",
     "swagger-ui-express": "^5.0.0"
   },
