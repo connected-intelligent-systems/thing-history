@@ -77,6 +77,7 @@ function installSwaggerUi (app) {
  */
 function installErrorHandler (app) {
   app.use((error, req, res, next) => {
+    console.log(error)
     // catch our own error instances
     if (error instanceof HttpError) {
       return res.status(error.status).json({
