@@ -14,4 +14,8 @@ COPY lib /app/lib
 
 EXPOSE 3000
 
+USER node
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 CMD curl -f http://localhost:3000|| exit 1
+
 CMD ["/app/run.sh"]
