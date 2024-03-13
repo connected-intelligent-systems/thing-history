@@ -4,6 +4,7 @@ RUN apk --no-cache add curl
 
 WORKDIR /app
 COPY package.json /app
+COPY package-lock.json /app
 COPY ./docker/run.sh /app/run.sh
 
 RUN npm install --production
