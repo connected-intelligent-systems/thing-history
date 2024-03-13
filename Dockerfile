@@ -1,12 +1,10 @@
-FROM node:20-slim
+FROM node:20.11.0-alpine3.18
 
-RUN apt-get update && apt-get install -y \
-  curl \
-  && rm -rf /var/lib/apt/lists/*
+RUN apk --no-cache add curl
 
 RUN mkdir /app
 COPY package.json /app
-COPY ./docker/run.sh /app/run.sh
+COPY ./docker/run.sh /app/run.shs
 
 WORKDIR /app
 RUN npm install --production
