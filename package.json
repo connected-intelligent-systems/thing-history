@@ -8,7 +8,7 @@
     "lint": "prettier --write '**/*.js' && standard --fix '**/*.js'",
     "depcheck": "depcheck",
     "start:production": "cross-env NODE_ENV=production node .",
-    "start:development": "cross-env NODE_ENV=development forever --killSignal=SIGTERM --minUptime 1000 --spinSleepTime 1000 -c 'node --inspect=0.0.0.0:9229' -w index.js ."
+    "start:development": "cross-env NODE_ENV=development node --inspect=0.0.0.0:9229 --watch ."
   },
   "author": "Sebastian Alberternst <sebastian.alberternst@dfki.de>",
   "license": "MIT",
@@ -25,7 +25,6 @@
   "devDependencies": {
     "cross-env": "^7.0.3",
     "depcheck": "^1.4.0",
-    "forever": "^3.0.4",
     "prettier": "^2.2.1",
     "standard": "^16.0.3"
   }
