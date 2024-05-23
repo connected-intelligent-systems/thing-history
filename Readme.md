@@ -10,6 +10,14 @@ Developers can refer to this documentation to understand how to interact with th
 
 To get started, please refer to the `api-doc.yml` file for detailed information on the available endpoints and example usage.
 
+## How to run this image
+
+```shell
+docker run -it --rm --name thing-history \
+-e POSTGRES_URL='postgresql://postgres:5432/thingsboard' \
+registry.fsn.iotx.materna.work/registry/public/thing-history:latest
+```
+
 ## Environment Variables
 
 The following environment variables can be configured for the Thing History service:
